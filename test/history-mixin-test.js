@@ -40,30 +40,12 @@ var expect = chai.expect;
 var app = oecloud;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
-var Customer;
 var api = defaults(supertest(app));
+
 var basePath = app.get('restApiRoot');
-var url = basePath + '/Employees';
 
 var models = oecloud.models;
 
-function deleteAllUsers(done) {
-  var userModel = loopback.findModel('User');
-  userModel.destroyAll({}, { notify: false }, function (err) {
-    if (err) {
-      return done(err);
-    }
-    userModel.find({}, {}, function (err2, r2) {
-      if (err2) {
-        return done(err2);
-      }
-      if (r2 && r2.length > 0) {
-        return done(new Error('Error : users were not deleted'));
-      }
-    });
-    return done(err);
-  });
-}
 
 var globalCtx = {
   ignoreAutoScope: true,
@@ -71,6 +53,7 @@ var globalCtx = {
 };
 
 describe(chalk.blue('History Mixin Test Started'), function (done) {
+
   var modelName = 'MixinTest';
   var modelDetails = {
     name: modelName,
@@ -107,6 +90,7 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
   });
 
 
+
   it('t1 (oecloud 1.x tests) should create a history model for Test model', function (done) {
     var mainModel = loopback.getModel(modelName, globalCtx);
     var model = loopback.getModel(mainModel.modelName + 'History', globalCtx);
@@ -140,51 +124,52 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
 
   it('t3 (oecloud 1.x tests) should insert data to TestModel model, update the same record multiple times and retrive its history.' +
     ' --programmatically',
-  function (done) {
-    this.timeout(15000);
-    var postData = {
-      'name': 'TestCaseTwo'
-    };
-    var dataId;
-    model.create(postData, globalCtx, function (err, res) {
-      if (err) {
-        done(err);
-      } else {
-        postData.id = res.id;
-        postData.name = 'update1';
-        postData._version = res._version;
-        model.upsert(postData, globalCtx, function (err, upsertRes) {
-          if (err) {
-            done(err);
-          } else {
-            postData.name = 'update2';
-            postData.id = upsertRes.id;
-            postData._version = upsertRes._version;
-            model.upsert(postData, globalCtx, function (err, upsertRes) {
-              if (err) {
-                done(err);
-              } else {
-                model.history({
-                  where: {
-                    _modelId: dataId
-                  }
-                },
-                globalCtx, function (err, historyRes) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    expect(historyRes).not.to.be.empty;
-                    expect(historyRes).to.have.length(2);
-                    done();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
+    function (done) {
+
+      this.timeout(15000);
+      var postData = {
+        'name': 'TestCaseTwo'
+      };
+      var dataId;
+      model.create(postData, globalCtx, function (err, res) {
+        if (err) {
+          done(err);
+        } else {
+          postData.id = res.id;
+          postData.name = 'update1';
+          postData._version = res._version;
+          model.upsert(postData, globalCtx, function (err, upsertRes) {
+            if (err) {
+              done(err);
+            } else {
+              postData.name = 'update2';
+              postData.id = upsertRes.id;
+              postData._version = upsertRes._version;
+              model.upsert(postData, globalCtx, function (err, upsertRes) {
+                if (err) {
+                  done(err);
+                } else {
+                  model.history({
+                    where: {
+                      _modelId: dataId
+                    }
+                  },
+                    globalCtx, function (err, historyRes) {
+                      if (err) {
+                        done(err);
+                      } else {
+                        expect(historyRes).not.to.be.empty;
+                        expect(historyRes).to.have.length(2);
+                        done();
+                      }
+                    });
+                }
+              });
+            }
+          });
+        }
+      });
     });
-  });
 
   it('t4 (oecloud 1.x tests) should insert data to TestModel model, destroy the same record retrive its history ', function (done) {
     this.timeout(10000);
@@ -221,6 +206,7 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
   });
 
   it('t5 (oecloud 1.x tests) should insert new record, using upsert if id is not defined.', function (done) {
+
     var postData = {
       'name': 'TestCaseFive',
       '_version': uuidv4()
@@ -276,6 +262,55 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
         }
       });
     });
+
+
+  it('t6 (oecloud 2.x test) create record and then update using replacebyid', function (done) {
+    this.timeout(50000);
+    var postData = {
+      id: 123,
+      name: "Atul",
+      age: 30
+    };
+    var customerModel = loopback.findModel('Customer');
+    customerModel.create(postData, globalCtx, function (err, customer) {
+      if (err) {
+        return done(err);
+      } else {
+        customerModel.replaceById(customer.id, { name: "Atul111", age: 31, _version: customer._version }, globalCtx, function (err, customer2) {
+          if (err) {
+            return done(err);
+          }
+          var newData = customer2.toObject();
+          newData.name = 'Atul222';
+          customerModel.replaceOrCreate(newData, globalCtx, function (err, customer3) {
+            if (err) {
+              return done(err);
+            }
+            customer3.updateAttributes({ name: "Atul3333", age: 35, id: customer3.id, _version: customer3._version }, globalCtx, function (err, customer4) {
+              if (err) {
+                return done(err);
+              }
+              if (customer4.name !== 'Atul3333' || customer4.age !== 35) {
+                return done(new Error("data not matching. expetcing name change"));
+              }
+              var url = basePath + '/Customers/history?filter={"where" : { "_modelId" : 123 } }';
+
+              api
+                .get(url)
+                .send()
+                .expect(200).end(function (err, historyRes) {
+                  if (err) {
+                    return done(err);
+                  } else {
+                    expect(historyRes.body).not.to.be.empty;
+                    expect(historyRes.body).to.have.length(3);
+                    return done();
+                  }
+                });
+            })
+          })
+        })
+      }
+    });
+  });
 });
-
-
