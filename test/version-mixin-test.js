@@ -9,7 +9,7 @@
 var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 var bootstrap = require('./bootstrap');
-/*var oecloud = require('oe-cloud');
+/* var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
 oecloud.observe('loaded', function (ctx, next) {
@@ -46,7 +46,7 @@ var url = basePath + '/Employees';
 var models = oecloud.models;
 
 function deleteAllUsers(done) {
-  var userModel = loopback.findModel("User");
+  var userModel = loopback.findModel('User');
   userModel.destroyAll({}, {}, function (err) {
     if (err) {
       return done(err);
@@ -56,7 +56,7 @@ function deleteAllUsers(done) {
         return done(err2);
       }
       if (r2 && r2.length > 0) {
-        return done(new Error("Error : users were not deleted"));
+        return done(new Error('Error : users were not deleted'));
       }
       return done();
     });
@@ -71,12 +71,12 @@ var globalCtx = {
 describe(chalk.blue('Version Mixin Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
-    //app.on('test-start', function () {
-    Customer = loopback.findModel("Customer");
+    // app.on('test-start', function () {
+    Customer = loopback.findModel('Customer');
     deleteAllUsers(function () {
       return done();
     });
-    //});
+    // });
   });
 
   afterEach('destroy context', function (done) {
@@ -87,13 +87,12 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
     var url = basePath + '/users';
     api.set('Accept', 'application/json')
       .post(url)
-      .send([{ username: "admin", password: "admin", email: "admin@admin.com" },
-      { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
-      { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-      { username: "bpouser", password: "bpouser", email: "bpouser@bpouser.com" }
+      .send([{ username: 'admin', password: 'admin', email: 'admin@admin.com' },
+        { username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
+        { username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
+        { username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' }
       ])
       .end(function (err, response) {
-
         var result = response.body;
         expect(result[0].id).to.be.defined;
         expect(result[1].id).to.be.defined;
@@ -108,7 +107,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
       .post(url)
-      .send({ username: "admin", password: "admin" })
+      .send({ username: 'admin', password: 'admin' })
       .end(function (err, response) {
         var result = response.body;
         adminToken = result.id;
@@ -124,7 +123,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
   });
 
   it('t3-2 create records in Customer models', function (done) {
-    Customer.create([{ name: "Smith", age: 30, id: 1 }, { name: "Atul", age: 30, id: 2 }, { name: "John", age: 30, id: 3 }], globalCtx, function (err, r) {
+    Customer.create([{ name: 'Smith', age: 30, id: 1 }, { name: 'Atul', age: 30, id: 2 }, { name: 'John', age: 30, id: 3 }], globalCtx, function (err, r) {
       if (err) {
         return done(err);
       }
@@ -144,15 +143,15 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       expect(r[0]._version).not.to.be.undefined;
 
       var instance = r[0];
-      instance.updateAttributes({ name: "Changed", id: 1, age: 50 }, globalCtx, function (err, r) {
+      instance.updateAttributes({ name: 'Changed', id: 1, age: 50 }, globalCtx, function (err, r) {
         if (!err) {
-          return done(new Error("Expcted test case to throw error"));
+          return done(new Error('Expcted test case to throw error'));
         }
-        instance.updateAttributes({ name: "Changed", id: 1, age: 50, _version: "ABCDEF" }, globalCtx, function (err, r) {
+        instance.updateAttributes({ name: 'Changed', id: 1, age: 50, _version: 'ABCDEF' }, globalCtx, function (err, r) {
           if (err) {
             return done();
           }
-          return done(new Error("Expcted test case to throw error"));
+          return done(new Error('Expcted test case to throw error'));
         });
       });
     });
@@ -167,7 +166,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       expect(r[0]._version).not.to.be.undefined;
 
       var instance = r[0];
-      instance.updateAttributes({ name: "Changed", id: 1, age: 50, _version: instance._version }, globalCtx, function (err, r) {
+      instance.updateAttributes({ name: 'Changed', id: 1, age: 50, _version: instance._version }, globalCtx, function (err, r) {
         if (err) {
           return done(err);
         }
@@ -186,11 +185,11 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       expect(r[0]._version).not.to.be.undefined;
 
       var instance = r[0];
-      Customer.replaceById(1, { name: "Changed Again", age: 55 }, globalCtx, function (err, r) {
+      Customer.replaceById(1, { name: 'Changed Again', age: 55 }, globalCtx, function (err, r) {
         if (err) {
           return done();
         }
-        return done(new Error("Error"));
+        return done(new Error('Error'));
       });
     });
   });
@@ -203,7 +202,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       expect(r.length).to.be.equal(3);
       expect(r[0]._version).not.to.be.undefined;
       var instance = r[0];
-      Customer.replaceById(1, { name: "Changed Again", age: 55, _version: instance._version }, globalCtx, function (err, r) {
+      Customer.replaceById(1, { name: 'Changed Again', age: 55, _version: instance._version }, globalCtx, function (err, r) {
         if (err) {
           return done(err);
         }
@@ -213,7 +212,6 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
   });
 
   it('t6-1 fetch record and update without providing version or passing wrong version - it should fail - using HTTP REST', function (done) {
-
     var url = basePath + '/customers?access_token=' + adminToken;
     api.set('Accept', 'application/json')
       .get(url)
@@ -225,14 +223,14 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
 
         api.set('Accept', 'application/json')
           .put(url)
-          .send({ name: "Customer AA", age: 100, id: 1 })
+          .send({ name: 'Customer AA', age: 100, id: 1 })
           .end(function (err, response) {
             var result = response.body;
             expect(response.status).not.to.be.equal(200);
 
             api.set('Accept', 'application/json')
               .put(url)
-              .send({ name: "Customer AA", age: 100, id: 1, _version: "ABCDDD" })
+              .send({ name: 'Customer AA', age: 100, id: 1, _version: 'ABCDDD' })
               .end(function (err, response) {
                 var result = response.body;
                 expect(response.status).not.to.be.equal(200);
@@ -244,7 +242,6 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
 
 
   it('t6-2 fetch record and update by providing right version - it should succeed - using HTTP REST', function (done) {
-
     var url = basePath + '/customers?access_token=' + adminToken;
     api.set('Accept', 'application/json')
       .get(url)
@@ -255,7 +252,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
         var instance = result[0];
         api.set('Accept', 'application/json')
           .put(url)
-          .send({ name: "Customer BB", age: 100, id: 1, _version: instance._version })
+          .send({ name: 'Customer BB', age: 100, id: 1, _version: instance._version })
           .end(function (err, response) {
             var result = response.body;
             expect(response.status).to.be.equal(200);
@@ -265,7 +262,6 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
   });
 
   it('t6-3 fetch record and ensure that update was right - using HTTP REST', function (done) {
-
     var url = basePath + '/customers?access_token=' + adminToken;
     api.set('Accept', 'application/json')
       .get(url)
@@ -273,7 +269,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
         var result = response.body;
         expect(response.status).to.be.equal(200);
         expect(result.length).to.be.equal(3);
-        expect(result.find(function (item) { return (item.name === "Customer BB" && item.age === 100); }).name).to.be.equal("Customer BB");
+        expect(result.find(function (item) { return (item.name === 'Customer BB' && item.age === 100); }).name).to.be.equal('Customer BB');
         return done();
       });
   });
@@ -288,14 +284,13 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       expect(r[1]._version).not.to.be.undefined;
 
       var instance = r[1];
-      instance.updateAttributes({name : "Atul", age : 44, id : instance.id}, globalCtx, function(err, r){
+      instance.updateAttributes({name: 'Atul', age: 44, id: instance.id}, globalCtx, function (err, r) {
         return done();
       });
     });
-  });  
+  });
 
   it('t7-1 deleting record without providing version or providing wrong version - it should fail - using HTTP REST', function (done) {
-
     var url = basePath + '/customers?access_token=' + adminToken;
     api.set('Accept', 'application/json')
       .get(url)
@@ -354,7 +349,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
     base: 'BaseEntity',
     properties: {
       'name': {
-        'type': 'string',
+        'type': 'string'
       }
     },
     plural: modelName
@@ -547,7 +542,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
               if (err2) {
                 return done();
               }
-              done(new Error("Expected version error but got success code"));
+              done(new Error('Expected version error but got success code'));
             });
           }
         });
@@ -603,20 +598,19 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
     model.destroyAll({}, globalCtx, function (err, info) {
       if (err) {
         return done(err);
-      } else {
-        models.ModelDefinition.destroyAll({
-          "name": modelName
-        }, globalCtx, function (err) { });
-        return done();
       }
+      models.ModelDefinition.destroyAll({
+        'name': modelName
+      }, globalCtx, function (err) { });
+      return done();
     });
   });
 
   var async = require('async');
   var Person;
   it('t9-0 create records in Person models', function (done) {
-    Person = loopback.findModel("Person");
-    Person.create([{ name: "Person Smith", age: 30, id: 1 }, { name: "Person Atul", age: 30, id: 2 }, { name: "Person John", age: 30, id: 3 }], globalCtx, function (err, r) {
+    Person = loopback.findModel('Person');
+    Person.create([{ name: 'Person Smith', age: 30, id: 1 }, { name: 'Person Atul', age: 30, id: 2 }, { name: 'Person John', age: 30, id: 3 }], globalCtx, function (err, r) {
       if (err) {
         return done(err);
       }
@@ -652,16 +646,13 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
             var ary = [inst1, inst2, inst3, inst4];
             var flags = [];
             async.eachOf(ary, function (instance, index, cb) {
-              instance.updateAttributes({ name: "New Name via UpdateAttribute" + index.toString(), _version :  instance._version }, globalCtx, function (err, inst) {
+              instance.updateAttributes({ name: 'New Name via UpdateAttribute' + index.toString(), _version: instance._version }, globalCtx, function (err, inst) {
                 if (err) {
                   flags.push(false);
-                }
-                else
-                  flags.push(true);
+                } else {flags.push(true);}
 
                 return cb();
               });
-
             }, function (err) {
               var cnt = 0;
               for (var i = 0; i < flags.length; ++i) {
@@ -670,7 +661,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
                 }
               }
               if (cnt != 1) {
-                return done(new Error("Update of More than one instance was successful which should not have happened."));
+                return done(new Error('Update of More than one instance was successful which should not have happened.'));
               }
               return done(err);
             });
@@ -678,7 +669,6 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
         });
       });
     });
-
   });
 
   it('t10 - multiple updates using replaceById at same time should fail for all but one', function (done) {
@@ -694,12 +684,10 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
 
       var flags = [];
       async.eachOf(ary, function (instance, index, cb) {
-        Person.replaceById(2, { name: "New Name via replaceById" + index.toString(), _version: version }, globalCtx, function (err, inst) {
+        Person.replaceById(2, { name: 'New Name via replaceById' + index.toString(), _version: version }, globalCtx, function (err, inst) {
           if (err) {
             flags.push(false);
-          }
-          else
-            flags.push(true);
+          } else {flags.push(true);}
 
           return cb();
         });
@@ -711,7 +699,7 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
           }
         }
         if (cnt != 1) {
-          return done(new Error("Update of More than one instance was successful which should not have happened."));
+          return done(new Error('Update of More than one instance was successful which should not have happened.'));
         }
         return done(err);
       });
@@ -731,12 +719,10 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
 
       var flags = [];
       async.eachOf(ary, function (instance, index, cb) {
-        Person.upsert({ id : 2, name: "New Name via upsert" + index.toString(), _version: version }, globalCtx, function (err, inst) {
+        Person.upsert({ id: 2, name: 'New Name via upsert' + index.toString(), _version: version }, globalCtx, function (err, inst) {
           if (err) {
             flags.push(false);
-          }
-          else
-            flags.push(true);
+          } else {flags.push(true);}
 
           return cb();
         });
@@ -748,16 +734,12 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
           }
         }
         if (cnt != 1) {
-          return done(new Error("Update of More than one instance was successful which should not have happened."));
+          return done(new Error('Update of More than one instance was successful which should not have happened.'));
         }
         return done(err);
       });
     });
   });
-
 });
-
-
-
 
 

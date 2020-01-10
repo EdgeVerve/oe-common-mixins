@@ -10,15 +10,15 @@ var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
 oecloud.observe('loaded', function (ctx, next) {
-  oecloud.attachMixinsToBaseEntity("VersionMixin");
-  oecloud.attachMixinsToBaseEntity("AuditFieldsMixin");
-  oecloud.attachMixinsToBaseEntity("HistoryMixin");
-  oecloud.attachMixinsToBaseEntity("SoftDeleteMixin");
-  oecloud.attachMixinsToBaseEntity("CryptoMixin");
-  
-  
+  oecloud.attachMixinsToBaseEntity('VersionMixin');
+  oecloud.attachMixinsToBaseEntity('AuditFieldsMixin');
+  oecloud.attachMixinsToBaseEntity('HistoryMixin');
+  oecloud.attachMixinsToBaseEntity('SoftDeleteMixin');
+  oecloud.attachMixinsToBaseEntity('CryptoMixin');
+
+
   return next();
-})
+});
 
 
 oecloud.boot(__dirname, function (err) {
@@ -38,6 +38,5 @@ describe('Common Mixins Test Started', function () {
     });
   });
 });
-
 
 

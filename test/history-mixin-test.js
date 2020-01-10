@@ -11,7 +11,7 @@ var loopback = require('loopback');
 var bootstrap = require('./bootstrap');
 const uuidv4 = require('uuid/v4');
 var debug = require('debug')('history-mixin-test');
-/*var oecloud = require('oe-cloud');
+/* var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
 oecloud.observe('loaded', function (ctx, next) {
@@ -48,7 +48,7 @@ var url = basePath + '/Employees';
 var models = oecloud.models;
 
 function deleteAllUsers(done) {
-  var userModel = loopback.findModel("User");
+  var userModel = loopback.findModel('User');
   userModel.destroyAll({}, { notify: false }, function (err) {
     if (err) {
       return done(err);
@@ -58,7 +58,7 @@ function deleteAllUsers(done) {
         return done(err2);
       }
       if (r2 && r2.length > 0) {
-        return done(new Error("Error : users were not deleted"));
+        return done(new Error('Error : users were not deleted'));
       }
     });
     return done(err);
@@ -71,7 +71,6 @@ var globalCtx = {
 };
 
 describe(chalk.blue('History Mixin Test Started'), function (done) {
-
   var modelName = 'MixinTest';
   var modelDetails = {
     name: modelName,
@@ -108,7 +107,6 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
   });
 
 
-
   it('t1 (oecloud 1.x tests) should create a history model for Test model', function (done) {
     var mainModel = loopback.getModel(modelName, globalCtx);
     var model = loopback.getModel(mainModel.modelName + 'History', globalCtx);
@@ -142,52 +140,51 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
 
   it('t3 (oecloud 1.x tests) should insert data to TestModel model, update the same record multiple times and retrive its history.' +
     ' --programmatically',
-    function (done) {
-
-      this.timeout(15000);
-      var postData = {
-        'name': 'TestCaseTwo'
-      };
-      var dataId;
-      model.create(postData, globalCtx, function (err, res) {
-        if (err) {
-          done(err);
-        } else {
-          postData.id = res.id;
-          postData.name = 'update1';
-          postData._version = res._version;
-          model.upsert(postData, globalCtx, function (err, upsertRes) {
-            if (err) {
-              done(err);
-            } else {
-              postData.name = 'update2';
-              postData.id = upsertRes.id;
-              postData._version = upsertRes._version;
-              model.upsert(postData, globalCtx, function (err, upsertRes) {
-                if (err) {
-                  done(err);
-                } else {
-                  model.history({
-                    where: {
-                      _modelId: dataId
-                    }
-                  },
-                    globalCtx, function (err, historyRes) {
-                      if (err) {
-                        done(err);
-                      } else {
-                        expect(historyRes).not.to.be.empty;
-                        expect(historyRes).to.have.length(2);
-                        done();
-                      }
-                    });
-                }
-              });
-            }
-          });
-        }
-      });
+  function (done) {
+    this.timeout(15000);
+    var postData = {
+      'name': 'TestCaseTwo'
+    };
+    var dataId;
+    model.create(postData, globalCtx, function (err, res) {
+      if (err) {
+        done(err);
+      } else {
+        postData.id = res.id;
+        postData.name = 'update1';
+        postData._version = res._version;
+        model.upsert(postData, globalCtx, function (err, upsertRes) {
+          if (err) {
+            done(err);
+          } else {
+            postData.name = 'update2';
+            postData.id = upsertRes.id;
+            postData._version = upsertRes._version;
+            model.upsert(postData, globalCtx, function (err, upsertRes) {
+              if (err) {
+                done(err);
+              } else {
+                model.history({
+                  where: {
+                    _modelId: dataId
+                  }
+                },
+                globalCtx, function (err, historyRes) {
+                  if (err) {
+                    done(err);
+                  } else {
+                    expect(historyRes).not.to.be.empty;
+                    expect(historyRes).to.have.length(2);
+                    done();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
     });
+  });
 
   it('t4 (oecloud 1.x tests) should insert data to TestModel model, destroy the same record retrive its history ', function (done) {
     this.timeout(10000);
@@ -224,7 +221,6 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
   });
 
   it('t5 (oecloud 1.x tests) should insert new record, using upsert if id is not defined.', function (done) {
-
     var postData = {
       'name': 'TestCaseFive',
       '_version': uuidv4()
@@ -280,12 +276,6 @@ describe(chalk.blue('History Mixin Test Started'), function (done) {
         }
       });
     });
-
-
-
 });
-
-
-
 
 
