@@ -32,7 +32,7 @@ var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('history-mixin');
 log.info('history-mixin Loaded');
-
+const oecloudutil = require('oe-cloud/lib/common/util');
 
 module.exports = function HistoryMixin(Model) {
   // Skip this mixin where ever not applicable.
@@ -231,6 +231,22 @@ function createHistoryData(ctx, next) {
       });
       return next();
     });
+  } else if ( ctx.data || ctx.instance ) {
+    var instance = ctx.data || ctx.instance;
+    var id = oecloudutil.getIdValue(ctx.Model, instance);
+    ctx.Model.findById(id, {notify: false}, function (err, data) {
+      if (err) {
+        return next(err);
+      }
+      if (!data) {
+        var e = new Error('Model ID error ' + id);
+        e.message = 'Model ID error ' + id;
+        return next(e);
+      }
+      ctx.hookState.historyData = [data.toObject()];
+      ctx.currentInstance = data;
+      return next();
+    });
   } else {
     return next();
   }
@@ -287,5 +303,3 @@ function createHistoryDataForDelete(ctx, next) {
 function insertIntoHistoryForDelete(ctx, next) {
   return insertIntoHistory(ctx, next);
 }
-
-
