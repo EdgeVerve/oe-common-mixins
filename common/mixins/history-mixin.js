@@ -244,7 +244,7 @@ function createHistoryData(ctx, next) {
         return next(e);
       }
       ctx.hookState.historyData = [data.toObject()];
-      ctx.currentInstance = data;
+      // ctx.currentInstance = data;
       return next();
     });
   } else {
