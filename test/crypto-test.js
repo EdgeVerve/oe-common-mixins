@@ -14,8 +14,8 @@ var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var oracleHost = process.env.ORACLE_HOST || 'localhost';
-var oraclePort = process.env.ORACLE_PORT || 1521;
-var oracleService = process.env.ORACLE_SID || 'orcle.ad.infosys.com' ;// 'orclpdb.ad.infosys.com';
+var oraclePort = process.env.ORACLE_PORT ? parseInt(process.env.ORACLE_PORT) : 1521;
+var oracleService = process.env.ORACLE_SID || 'orcle.ad.infosys.com';// 'orclpdb.ad.infosys.com';
 var oracleUser = process.env.ORACLE_USERNAME || 'oeadmin';
 var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
 
@@ -49,7 +49,7 @@ describe(chalk.blue('Crypto Mixin Test Started'), function (done) {
       'CryptoMixin': true
     },
     dataSourceName: 'db',
-    propsToEncrypt : ["creditCardNo"]
+    propsToEncrypt: ['creditCardNo']
   };
 
 
@@ -108,12 +108,12 @@ describe(chalk.blue('Crypto Mixin Test Started'), function (done) {
         if (err) {
           done(err);
         } else {
-          if( db && db.db && db.db(dbname)){
+          if ( db && db.db && db.db(dbname)) {
             db = db.db(dbname);
           }
           var collection = db.collection(modelName);
           collection.findOne({
-            _id :id
+            _id: id
           }, function (err2, data2) {
             if (err2) {
               done(err2);
@@ -142,7 +142,7 @@ describe(chalk.blue('Crypto Mixin Test Started'), function (done) {
             }
             console.log('data2', result);
             result2 = result.rows && result.rows[0].creditcardno;
-            //console.log('result2', result2);
+            // console.log('result2', result2);
             done();
           });
       });
@@ -159,7 +159,7 @@ describe(chalk.blue('Crypto Mixin Test Started'), function (done) {
             if (err2) {
               done(err2);
             } else {
-              //console.log('data2', data2);
+              // console.log('data2', data2);
               result2 = data2.rows && data2.rows[0].creditcardno;
               console.log('result2', result2);
               done();

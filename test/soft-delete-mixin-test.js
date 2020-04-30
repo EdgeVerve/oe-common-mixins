@@ -10,7 +10,7 @@ var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 var bootstrap = require('./bootstrap');
 const uuidv4 = require('uuid/v4');
-/*var oecloud = require('oe-cloud');
+/* var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
 oecloud.observe('loaded', function (ctx, next) {
@@ -43,7 +43,6 @@ var globalCtx = {
 };
 
 
-
 describe(chalk.blue('Soft Delete Mixin Test Started'), function () {
   this.timeout(10000);
 
@@ -52,7 +51,7 @@ describe(chalk.blue('Soft Delete Mixin Test Started'), function () {
 
   var TestModelSchema = {
     name: modelName,
-    base : "BaseEntity",
+    base: 'BaseEntity',
     properties: {
       'name': {
         'type': 'string',
@@ -89,7 +88,7 @@ describe(chalk.blue('Soft Delete Mixin Test Started'), function () {
         done(err);
       } else {
         expect(res.name).to.be.equal(postData.name);
-        expect(res['_isDeleted']).to.be.false;
+        expect(res._isDeleted).to.be.false;
         done();
       }
     });
@@ -137,5 +136,4 @@ describe(chalk.blue('Soft Delete Mixin Test Started'), function () {
       }
     });
   });
-
 });
