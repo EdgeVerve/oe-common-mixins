@@ -17,6 +17,7 @@
 
 const uuidv4 = require('uuid/v4');
 const oecloudutil = require('oe-cloud/lib/common/util');
+const isMixinEnabled = require('../../lib/utils').isMixinEnabled;
 
 module.exports = function VersionMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
@@ -121,16 +122,26 @@ module.exports = function VersionMixin(Model) {
     if (ctx.Model.relations) {
       var relations = ctx.Model.relations;
       for (var r in ctx.Model.relations) {
-        if (relations[r].type !== 'embedsOne') {
+        if (relations[r].type !== 'embedsOne' &&  relations[r].type !== 'embedsMany') {
           continue;
         }
         var keyFrom = relations[r].keyFrom;
         if (!data._version && !ctx.isNewInstance && data[keyFrom] && typeof data[keyFrom] === 'object') {
-          data._version = data[keyFrom]._parentVersion || data[keyFrom]._version;
+          if (Array.isArray(data[keyFrom]) && data[keyFrom].length > 0 ) {
+            // Atul : For embeds many, it will be array
+            data._version = data[keyFrom][0]._parentVersion  || data[keyFrom][0]._version;
+          } else {
+            data._version = data[keyFrom]._parentVersion || data[keyFrom]._version;
+          }
           break;
-        } else if (ctx.isNewInstance) {
-          data[keyFrom] = data[keyFrom] || {};
-          data[keyFrom]._version = data._version;
+        } else if (ctx.isNewInstance && isMixinEnabled(relations[r].modelTo, 'VersionMixin')) {
+          if (relations[r].type === 'embedsOne' && data[keyFrom]) {
+            data[keyFrom]._version = data._version;
+          } else if (relations[r].type === 'embedsMany' && Array.isArray(data[keyFrom]) && data[keyFrom].length) {
+            data[keyFrom].forEach(function (item) {
+              item._version = data._version;
+            });
+          }
         }
       }
     }
