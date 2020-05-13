@@ -17,6 +17,7 @@
 
 const uuidv4 = require('uuid/v4');
 const oecloudutil = require('oe-cloud/lib/common/util');
+const isMixinEnabled = require('../../lib/utils').isMixinEnabled;
 
 module.exports = function VersionMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
@@ -41,6 +42,11 @@ module.exports = function VersionMixin(Model) {
   Model.defineProperty('_newVersion', {
     type: String
   });
+
+  Model.defineProperty('_parentVersion', {
+    type: String
+  });
+
 
   // Model.settings._versioning = true;
   // Model.settings.updateOnLoad = true;
@@ -112,18 +118,48 @@ module.exports = function VersionMixin(Model) {
       data._version = data._newVersion || data._version || uuidv4();
       delete data._oldVersion;
       delete data._newVersion;
+    }
+    if (ctx.Model.relations) {
+      var relations = ctx.Model.relations;
+      for (var r in ctx.Model.relations) {
+        if (relations[r].type !== 'embedsOne' &&  relations[r].type !== 'embedsMany') {
+          continue;
+        }
+        var keyFrom = relations[r].keyFrom;
+        if (!data._version && !ctx.isNewInstance && data[keyFrom] && typeof data[keyFrom] === 'object') {
+          if (Array.isArray(data[keyFrom]) && data[keyFrom].length > 0 ) {
+            // Atul : For embeds many, it will be array
+            data._version = data[keyFrom][0]._parentVersion  || data[keyFrom][0]._version;
+          } else {
+            data._version = data[keyFrom]._parentVersion || data[keyFrom]._version;
+          }
+          break;
+        } else if (ctx.isNewInstance && isMixinEnabled(relations[r].modelTo, 'VersionMixin')) {
+          if (relations[r].type === 'embedsOne' && data[keyFrom]) {
+            data[keyFrom]._version = data._version;
+          } else if (relations[r].type === 'embedsMany' && Array.isArray(data[keyFrom]) && data[keyFrom].length) {
+            data[keyFrom].forEach(function (item) {
+              item._version = data._version;
+            });
+          }
+        }
+      }
+    }
+    if (ctx.isNewInstance) {
       return next();
     }
+
     var error;
     var id = oecloudutil.getIdValue(ctx.Model, data);
     var _version = data._version;
+
     if (!data._version) {
       error = new Error();
       Object.assign(error, { name: 'Data Error', message: 'Version must be defined. id ' + id + ' for model ' + Model.modelName, code: 'DATA_ERROR_071', type: 'DataModifiedError', retriable: false, status: 422 });
       return next(error);
     }
     if (ctx.currentInstance) {
-      if (ctx.currentInstance._version !== ctx.data._version) {
+      if (ctx.currentInstance._version !== data._version) {
         error = new Error();
         Object.assign(error, { name: 'Data Error', message: 'Version must be be same. id ' + id + ' for model ' + Model.modelName + ' Version ' + _version + ' <> ' + ctx.currentInstance._version, code: 'DATA_ERROR_071', type: 'DataModifiedError', retriable: false, status: 422 });
         return next(error);
