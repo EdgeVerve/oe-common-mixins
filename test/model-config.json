@@ -53,5 +53,13 @@
   "Migration": {
     "dataSource": "db",
     "public": true
+  },
+  "Book" : {
+    "public" : true,
+    "dataSource" : "db"
+  },
+  "Page" : {
+    "public" : true,
+    "dataSource" : "db"
   }
 }

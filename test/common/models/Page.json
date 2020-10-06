@@ -1,20 +1,16 @@
 {
-  "name": "Person",
+  "name": "Page",
   "base": "BaseEntity",
   "idInjection": true,
   "properties": {
-    "name": {
+    "pagename": {
       "type": "string",
       "unique": true,
-      "required" : true
-    },
-    "age": {
-      "type": "number",
       "required" : true
     }
   },
   "mixins": {
-    "SoftDeleteMixin": false,
+    "SoftDeleteMixin": true,
     "VersionMixin": true
   },
   "validations": [],

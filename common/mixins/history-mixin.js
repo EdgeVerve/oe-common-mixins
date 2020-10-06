@@ -210,6 +210,9 @@ function createHistoryData(ctx, next) {
   if (!historyModel) {
     return next();
   }
+  if (ctx && ctx.embedsOne ) {
+    return next();
+  }
   if (ctx.currentInstance) {
     ctx.hookState.historyData = [ctx.currentInstance.toObject()];
     return next();
@@ -238,13 +241,14 @@ function createHistoryData(ctx, next) {
       if (err) {
         return next(err);
       }
+
       if (!data) {
         var e = new Error('Model ID error ' + id);
         e.message = 'Model ID error ' + id;
         return next(e);
       }
       ctx.hookState.historyData = [data.toObject()];
-      ctx.currentInstance = data;
+      // ctx.currentInstance = data;
       return next();
     });
   } else {

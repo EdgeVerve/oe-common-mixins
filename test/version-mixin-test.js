@@ -83,6 +83,12 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
     done();
   });
 
+  it('waiting to start', function(done){
+    setTimeout(function () {
+      return done();
+    }, 5000);
+  })
+
   it('t1-0 create user admin/admin with /default tenant', function (done) {
     var url = basePath + '/users';
     api.set('Accept', 'application/json')
@@ -740,6 +746,158 @@ describe(chalk.blue('Version Mixin Test Started'), function (done) {
       });
     });
   });
+
+  it('t12 - 1 - EmbedsOne test case - POST in parent', function (done) {
+
+    var d = {
+      "name": "n",
+      "id": "n",
+       "publisher": {
+        "name": "n",
+        "age": 0,
+        "id": "n"
+      }
+    };
+
+    const bookModel = loopback.findModel('Book');
+    var url = basePath + '/books';
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send(d)
+      .end(function (err, response) {
+        if(err){
+          return done(err);
+        }
+        var result = response.body;
+        expect(result.id).to.be.defined;
+        expect(result._version).to.be.defined;
+        expect(result.publisher._version).to.be.defined;
+        return done();
+      });
+  });
+
+  it('t12 - 2 - EmbedsOne test case - POST in embedded', function (done) {
+    var d = {
+        "name": "n-new",
+        "age": 0,
+        "id": "n"
+    };
+
+    const bookModel = loopback.findModel('Book');
+    bookModel.find({where : {id : "n"}}, function(err, data){
+
+      if(err){
+        return done(err);
+      }
+      d._version = data[0]._version;
+      var url = basePath + '/books/n/personRel';
+      api.set('Accept', 'application/json')
+        .post(url)
+        .send(d)
+        .end(function (err, response) {
+          if(err){
+            return done(err);
+          }
+          
+          var result = response.body;
+          if(result.error){
+            return done(result);
+          }
+          expect(result.name).to.be.equal('n-new');
+          return done();
+        });
+    })
+  })
+
+  it('t12 - 3 - EmbedsOne test case - PUT in parent', function (done) {
+    var d = {
+        "name": "book name modified",
+        "id": "n"
+    };
+    const bookModel = loopback.findModel('Book');
+    bookModel.find({where : {id : "n"}}, function(err, data){
+      if(err){
+        return done(err);
+      }
+      d._version = data[0]._version;
+      var url = basePath + '/books/n';
+      api.set('Accept', 'application/json')
+        .put(url)
+        .send(d)
+        .end(function (err, response) {
+          if(err){
+            return done(err);
+          }
+          var result = response.body;
+          if(result.error){
+            return done(result);
+          }
+          expect(result.name).to.be.equal('book name modified');
+          expect(result.publisher._version).to.be.defined;
+          return done();
+        });
+    })
+  })
+
+  it('t12 - 4 - EmbedsOne test case - PUT in embedded model (Version must match for embedded model)', function (done) {
+    var d = {
+        "name": "publisher modified",
+        "id": "n"
+    };
+    const bookModel = loopback.findModel('Book');
+    bookModel.find({where : {id : "n"}}, function(err, data){
+      if(err){
+        return done(err);
+      }
+      d._version = data[0]._version;
+      var url = basePath + '/books/n/personRel';
+      api.set('Accept', 'application/json')
+        .put(url)
+        .send(d)
+        .end(function (err, response) {
+          if(err){
+            return done(err)
+          }
+          var result = response.body;
+          if(!result.error){
+            return done(new Error("Expecting error as version is out of sync and parent version must be provided"));
+          }
+          return done();
+        });
+    })
+  })
+
+  it('t12 - 5 - EmbedsOne test case - PUT in embedded model (parentVersion must pass)', function (done) {
+    var d = {
+        "name": "publisher modified",
+        "id": "n"
+    };
+    const bookModel = loopback.findModel('Book');
+    bookModel.find({where : {id : "n"}}, function(err, data){
+      if(err){
+        return done(err);
+      }
+      d._parentVersion = data[0]._version;
+      d._version = data[0].publisher._version;
+      var url = basePath + '/books/n/personRel';
+      api.set('Accept', 'application/json')
+        .put(url)
+        .send(d)
+        .end(function (err, response) {
+          if(err){
+            return done(err)
+          }
+          var result = response.body;
+          if(result.error){
+            return done(new Error(result.error));
+          }
+          expect(result.name).to.be.equal('publisher modified');
+          expect(result._version).to.be.defined;
+          return done();
+        });
+    })
+  })
+
 });
 
 

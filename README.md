@@ -1,5 +1,6 @@
 # oe-common-mixins
 
+
 - [Introduction](#introduction)
   * [dependency](#dependency)
   * [Getting Started](#getting-started)
@@ -17,6 +18,10 @@
     + [Loading Mixin using app-list.json](#loading-mixin-using-app-listjson-1)
     + [Loading Mixin pragmatically](#loading-mixin-pragmatically-1)
   * [Developer Considerations](#developer-considerations-1)
+  * [EmbedsOne Relation](#embedsone-relation)
+    + [POST - create parent record](#post---create-parent-record)
+    + [PUT - Update parent record](#put---update-parent-record)
+    + [PUT - Updating embedded record](#put---updating-embedded-record)
 - [Soft Delete Mixin](#soft-delete-mixin)
   * [Using SoftDeleteMixin](#using-softdeletemixin)
     + [Loading Mixin using model-config.json](#loading-mixin-using-model-configjson-1)
@@ -271,6 +276,109 @@ model.destroyById(<id>, <version>, options, function(err, result){
 This can be confusing because for some models you will pass version while deleting and for some models, you will not pass as VersionMixin was not enabled for those models.
 
 * If programmer calls updateAll method in javascript, version checking would not be possible as multiple records are getting updated. For such models where version mixin is enabled, you should disable updateAll method. If it is not disabled or it is somehow gets called, concurrent update of same records could be possible.
+
+## EmbedsOne Relation
+When model is Embedded, version mixin behavior is little different and you need to take care of special case.
+
+### POST - create parent record
+
+When you are creating record in parent model and passing data of embedded model along, you don't have to worry about anything special. 
+
+Once record is created in parent model, _version will automatically generated and same _version field will be populated for both parent and embedded record. Response of such request will look like
+
+POST /api/Books 
+```
+{
+  "name": "a",
+  "id": "a",
+  "_isDeleted": false,
+  "_version": "679d0579-67d2-4e12-83a1-f1c8c20981c9",
+  "publisher": {
+    "name": "a",
+    "age": 0,
+    "id": "a",
+    "_isDeleted": false,
+    "_version": "679d0579-67d2-4e12-83a1-f1c8c20981c9"
+  }
+}
+```
+**Validation** : Child record and parent record both are validated. 
+
+### PUT - Update parent record
+
+For this operation, _version field must be populated in your request body. _version must be existing version of the existing record that you are trying to modify. 
+If no record with _version is found then oecloud will throw error. 
+
+PUT /api/Books/a
+```
+{
+ "name": "a-changed",
+  "id": "a",
+  "_version": "679d0579-67d2-4e12-83a1-f1c8c20981c9"
+}
+```
+Response
+
+```
+{
+  "name": "a-changed",
+  "id": "a",
+  "_isDeleted": false,
+  "_oldVersion": "679d0579-67d2-4e12-83a1-f1c8c20981c9",
+  "_version": "c289c6d2-4bdc-482a-8adc-76d215a402f5",
+  "publisher": {
+    "name": "a",
+    "age": 0,
+    "id": "a",
+    "_isDeleted": false,
+    "_version": "679d0579-67d2-4e12-83a1-f1c8c20981c9"
+  }
+}
+```
+Note that only parent record's _version is updated with new version. This will make _version field in embedded model and parent model go **out of sync**.
+
+**Validation** : only parent data is validated. 
+
+### PUT - Updating embedded record
+
+This is tricky operation. Here you want to just update embedded model record. But since embedded data is not residing in separate collection (or table), you are really modifying parent record. Therefore you need to supply parent record's version as well as child record's version. Parent record's version is supplied in _parentVersion field.
+
+/api/Books/a/personRel
+```
+{
+  "name": "publsher updatted",
+  "age": 11,
+  "id": "n",
+  "_version": "679d0579-67d2-4e12-83a1-f1c8c20981c9",
+  "_parentVersion" :"c289c6d2-4bdc-482a-8adc-76d215a402f5"
+}
+```
+As you can see above, you will see both _version and _parentVersion is supplied. This becomes important because parent record's version and embedded record version went out of sync.
+
+However when both are in 'sync', you may either supply only _parentVersion or _version. 
+However it is good practice to supply both of these fields.
+
+Response of such request will look like
+
+```
+{
+  "name": "publsher updatted",
+  "age": 11,
+  "id": "n",
+  "_isDeleted": false,
+  "_version": "486c7ea9-f1b6-413a-afdf-64210e72e81e",
+  "_parentVersion": "c289c6d2-4bdc-482a-8adc-76d215a402f5"
+}
+```
+if you go to database, you will find _version field of both parent and embedded record is same.
+
+**Validation** : All fields in embedded model are validated. However _version is validated for parent Model also. **before save** hooks on embedded Model and parent model are called.
+
+
+**Embedded model without Version Mixin**
+In above examples, we have assumed that embedded model will too have VersionMixin enabled. But if that is not the case, then it will not be possible to pass _parentVersion as **strict** flag on model is true by default.
+
+
 
 
 # Soft Delete Mixin

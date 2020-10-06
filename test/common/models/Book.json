@@ -1,0 +1,28 @@
+{
+  "name": "Book",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "unique": true,
+      "required" : true
+    }
+  },
+  "validations": [],
+  "acls": [],
+  "mixins": {
+    "SoftDeleteMixin": true,
+    "HistoryMixin": true,
+    "VersionMixin": true
+  },
+  "relations": {
+    "personRel" : {
+      "type" : "embedsOne",
+      "model" : "Person",
+      "property" : "publisher"
+    }
+  },
+  "methods": {}
+}
+
