@@ -15,9 +15,9 @@ var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var oracleHost = process.env.ORACLE_HOST || 'localhost';
 var oraclePort = process.env.ORACLE_PORT ? parseInt(process.env.ORACLE_PORT) : 1521;
-var oracleService = process.env.ORACLE_SID || 'orcle.ad.infosys.com';// 'orclpdb.ad.infosys.com';
-var oracleUser = process.env.ORACLE_USERNAME || 'oeadmin';
-var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
+var oracleService = process.env.ORACLE_SID;
+var oracleUser = process.env.ORACLE_USERNAME;
+var oraclePassword = process.env.ORACLE_PASSWORD;
 
 var chalk = require('chalk');
 var chai = require('chai');
@@ -31,7 +31,7 @@ var models = oecloud.models;
 describe(chalk.blue('Crypto Mixin Test Started'), function (done) {
   var modelName = 'CryptoTest';
   var dsname = 'db';
-  var dbname = process.env.DB_NAME || 'oe-common-mixins-test';
+  var dbName = process.env.DB_NAME || "dbname";
   var ccNo = '1234-5678-9012-3456';
 
   var TestModelSchema = {
